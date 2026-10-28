@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Counted at Birth, Missing at Death</title>
+<meta name="description" content="An interactive data story from NISR's Rwanda Vital Statistics 2019–2025: Rwanda registers 9 in 10 births but only 1 in 2 deaths.">
+<style>
+:root{
+  color-scheme: light;
+  --page:#f6f4ee; --surface:#fcfcfb; --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --axis:#c3c2b7; --ring:rgba(11,11,11,.10);
+  --birth:#2a78d6; --birth-soft:#cde2fb;
+  --death:#eb6834; --death-soft:#fbdccd;
+  --good:#1baf7a; --good-ink:#0b7a52;
+  --empty:#d9d7cf;
+  --rw-blue:#00a1de; --rw-yellow:#fad201; --rw-green:#20603d;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--page);color:var(--ink);font:17px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.flag{height:8px;background:linear-gradient(90deg,var(--rw-blue) 0 50%,var(--rw-yellow) 50% 75%,var(--rw-green) 75%)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+section{padding:72px 0;border-bottom:1px solid var(--grid)}
+.kicker{font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);margin:0 0 10px}
+h1{font-size:clamp(38px,6.4vw,72px);line-height:1.02;letter-spacing:-.02em;margin:0 0 18px;font-weight:800}
+h1 .b{color:var(--birth)} h1 .d{color:var(--death)}
+h2{font-size:clamp(28px,4vw,42px);line-height:1.1;letter-spacing:-.015em;margin:0 0 14px;font-weight:800}
+.lede{font-size:clamp(18px,2.2vw,22px);color:var(--ink-2);max-width:760px;margin:0}
+p.note{font-size:14px;color:var(--muted);margin:14px 0 0}
+.step{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:var(--ink);color:#fff;font-weight:800;font-size:15px;margin-bottom:14px}
+.card{background:var(--surface);border:1px solid var(--ring);border-radius:16px;padding:24px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media (max-width:760px){.cols,.cols3{grid-template-columns:1fr}section{padding:52px 0}}
+
+/* hero people grids */
+.hero{padding-top:56px}
+.grids{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:36px}
+@media (max-width:760px){.grids{grid-template-columns:1fr}}
+.gridcard h3{margin:0;font-size:18px;display:flex;align-items:center;gap:8px}
+.swatch{width:12px;height:12px;border-radius:3px;display:inline-block}
+.big{font-size:clamp(56px,8vw,88px);font-weight:800;line-height:1;margin:10px 0 2px;letter-spacing:-.03em}
+.sub{color:var(--ink-2);font-size:15px;margin:0 0 16px}
+.people{display:grid;grid-template-columns:repeat(20,1fr);gap:3px}
+.people svg{width:100%;height:auto;display:block}
+.people use{transition:fill .5s ease}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--ink-2);margin-top:12px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.player{display:flex;align-items:center;gap:16px;margin-top:28px;background:var(--surface);border:1px solid var(--ring);border-radius:999px;padding:10px 18px 10px 10px}
+.player button{border:0;background:var(--ink);color:#fff;border-radius:999px;height:42px;padding:0 18px;font:700 15px system-ui,sans-serif;cursor:pointer;flex:none}
+.player button:focus-visible,input[type=range]:focus-visible,.tbtn:focus-visible{outline:3px solid var(--rw-blue);outline-offset:2px}
+.player input{flex:1;accent-color:var(--ink);min-width:0}
+.yr{font-size:28px;font-weight:800;width:72px;text-align:right;flex:none;font-variant-numeric:tabular-nums}
+
+/* charts */
+.chart{position:relative}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart .gl{stroke:var(--grid);stroke-width:1}
+.chart .base{stroke:var(--axis);stroke-width:1}
+.chart text{font:13px system-ui,sans-serif;fill:var(--muted)}
+.chart text.lab{fill:var(--ink);font-weight:700;font-size:14px}
+.chart text.lab2{fill:var(--ink-2);font-size:13px}
+.line{fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.draw{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);transition:stroke-dashoffset 1.8s ease}
+.in .draw{stroke-dashoffset:0}
+.dot{stroke:var(--surface);stroke-width:2}
+.fade{opacity:0;transition:opacity .6s ease 1.4s}.in .fade{opacity:1}
+.cross{stroke:var(--axis);stroke-width:1;opacity:0}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:#fff;font-size:13px;line-height:1.4;padding:8px 10px;border-radius:8px;opacity:0;transition:opacity .12s;white-space:nowrap;z-index:5}
+.tip b{font-size:14px}
+.tip i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;font-style:normal}
+
+/* bars */
+.bars{display:flex;flex-direction:column;gap:14px}
+.brow .bl{display:flex;justify-content:space-between;font-size:15px;margin-bottom:6px}
+.brow .bl b{font-variant-numeric:tabular-nums}
+.track{height:22px;background:var(--empty);border-radius:4px;overflow:hidden;display:flex;gap:2px}
+.fill{height:100%;width:0;border-radius:4px;transition:width 1.4s cubic-bezier(.2,.7,.2,1)}
+.track.split{background:transparent}
+.track.split .fill:first-child{border-radius:4px 0 0 4px}.track.split .fill:last-child{border-radius:0 4px 4px 0}
+
+.stat{font-size:clamp(40px,5vw,56px);font-weight:800;line-height:1;letter-spacing:-.02em;margin:6px 0 6px}
+.stat small{font-size:.45em;font-weight:700;color:var(--ink-2);letter-spacing:0}
+.pill{display:inline-block;font-size:13px;font-weight:700;padding:3px 10px;border-radius:999px;background:#e3f5ee;color:var(--good-ink)}
+.callout{border-left:4px solid var(--death);padding:4px 0 4px 16px;font-size:19px;margin:24px 0 0;max-width:760px}
+
+/* columns (verbal autopsy) */
+.colchart{display:flex;align-items:flex-end;gap:18px;height:240px;padding-top:28px;border-bottom:1px solid var(--axis)}
+.colw{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;position:relative}
+.col{width:min(56px,70%);height:0;background:var(--good);border-radius:4px 4px 0 0;transition:height 1.4s cubic-bezier(.2,.7,.2,1)}
+.colv{font-weight:800;font-size:15px;margin-bottom:6px;opacity:0;transition:opacity .4s 1.2s;font-variant-numeric:tabular-nums}
+.in .colv{opacity:1}
+.colx{display:flex;gap:18px}.colx div{flex:1;text-align:center;font-size:13px;color:var(--muted);padding-top:6px}
+
+/* call to action */
+.cta{background:var(--ink);color:#fff;border-radius:20px;padding:44px 36px;margin-top:8px}
+.cta h2{color:#fff}
+.cta p{color:#d7d6d0;font-size:19px;max-width:720px}
+.cta ol{margin:22px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media (max-width:760px){.cta ol{grid-template-columns:1fr}.cta{padding:32px 22px}}
+.cta li{background:#1f1f1e;border-radius:14px;padding:18px;font-size:16px;color:#ecebe6}
+.cta li b{display:block;color:#fff;font-size:18px;margin-bottom:4px}
+
+/* table + footer */
+.tbtn{border:1px solid var(--axis);background:var(--surface);border-radius:999px;padding:10px 18px;font:700 15px system-ui,sans-serif;cursor:pointer;color:var(--ink)}
+.tablewrap{overflow-x:auto;margin-top:18px}
+table{border-collapse:collapse;width:100%;font-size:14px;background:var(--surface)}
+th,td{padding:8px 10px;border-bottom:1px solid var(--grid);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+th:first-child,td:first-child{text-align:left;white-space:normal}
+thead th{color:var(--ink-2);font-weight:700}
+footer{padding:48px 0 64px;font-size:14px;color:var(--ink-2)}
+footer h3{color:var(--ink);font-size:16px;margin:0 0 8px}
+footer p{margin:0 0 12px;max-width:820px}
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}.draw{stroke-dashoffset:0}.reveal{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="flag" role="presentation"></div>
+
+<!-- 1. HOOK -->
+<section class="hero">
+  <div class="wrap">
+    <p class="kicker">Rwanda Vital Statistics · 2019–2025</p>
+    <h1>Counted at <span class="b">birth</span>.<br>Missing at <span class="d">death</span>.</h1>
+    <p class="lede">Rwanda now puts almost every newborn on the record. But for every two people who die, only about one death is registered. Drag the slider or press play to watch how that changed from 2019 to 2025.</p>
+
+    <div class="grids">
+      <div class="card gridcard">
+        <h3><span class="swatch" style="background:var(--birth)"></span>Births registered</h3>
+        <div class="big" id="bNum">92.9%</div>
+        <p class="sub" id="bSub">of expected births were registered</p>
+        <div class="people" id="bGrid" aria-hidden="true"></div>
+      </div>
+      <div class="card gridcard">
+        <h3><span class="swatch" style="background:var(--death)"></span>Deaths registered</h3>
+        <div class="big" id="dNum">50.5%</div>
+        <p class="sub" id="dSub">of expected deaths were registered</p>
+        <div class="people" id="dGrid" aria-hidden="true"></div>
+      </div>
+    </div>
+    <div class="legend"><span><span class="swatch" style="background:var(--birth)"></span>Registered birth</span><span><span class="swatch" style="background:var(--death)"></span>Registered death</span><span><span class="swatch" style="background:var(--empty)"></span>Not on the record</span><span>Each figure = 1 in every 100 expected events</span></div>
+
+    <div class="player">
+      <button id="play" type="button" aria-label="Play 2019 to 2025">▶ Play</button>
+      <input id="year" type="range" min="2019" max="2025" step="1" value="2025" aria-label="Year">
+      <div class="yr" id="yrLabel">2025</div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. TREND -->
+<section>
+  <div class="wrap reveal">
+    <div class="step">1</div>
+    <h2>The death gap is closing, fast</h2>
+    <p class="lede">Death registration fell to 26.2% in 2021, then climbed every year after. It reached 50.5% in 2025, <b>up 19.1 points since 2019</b>. Births stayed above 84% the whole time.</p>
+    <div class="card" style="margin-top:28px">
+      <div class="legend" style="margin:0 0 8px"><span><span class="swatch" style="background:var(--birth)"></span>Birth registration completeness</span><span><span class="swatch" style="background:var(--death)"></span>Death registration completeness</span></div>
+      <div class="chart" id="trend"></div>
+    </div>
+    <p class="note">Completeness = registered events ÷ expected events. Source: NISR, CRVS 2025 Final Tables, Table 10.3 and Table 12.</p>
+  </div>
+</section>
+
+<!-- 3. WHO IS MISSING -->
+<section>
+  <div class="wrap reveal">
+    <div class="step">2</div>
+    <h2>Who is still missing from the record?</h2>
+    <p class="lede">In 2025, about <b>38,500 expected deaths</b> were not registered. The gap is biggest where deaths happen away from hospitals, and for women.</p>
+    <div class="cols3" style="margin-top:28px">
+      <div class="card">
+        <p class="kicker">Where people die</p>
+        <div class="stat">55.9%<small> at home</small></div>
+        <p class="sub">of registered deaths in 2025 happened in the community, not a health facility.</p>
+        <div class="track split" role="img" aria-label="55.9% community, 44.1% health facility">
+          <div class="fill" data-w="55.9" style="background:var(--death)"></div>
+          <div class="fill" data-w="44.1" style="background:var(--birth)"></div>
+        </div>
+        <div class="legend"><span><span class="swatch" style="background:var(--death)"></span>Community 55.9%</span><span><span class="swatch" style="background:var(--birth)"></span>Facility 44.1%</span></div>
+      </div>
+      <div class="card">
+        <p class="kicker">Rural vs urban</p>
+        <div class="bars">
+          <div class="brow"><div class="bl"><span>Rural deaths at home</span><b>61%</b></div><div class="track"><div class="fill" data-w="61.3" style="background:var(--death)"></div></div></div>
+          <div class="brow"><div class="bl"><span>Urban deaths at home</span><b>41%</b></div><div class="track"><div class="fill" data-w="41.4" style="background:var(--death)"></div></div></div>
+        </div>
+        <p class="sub" style="margin-top:14px">Rural families are more likely to lose a relative at home, where nobody from a health facility records the death.</p>
+      </div>
+      <div class="card">
+        <p class="kicker">Men vs women</p>
+        <div class="bars">
+          <div class="brow"><div class="bl"><span>Men's deaths registered</span><b>57.6%</b></div><div class="track"><div class="fill" data-w="57.6" style="background:var(--death)"></div></div></div>
+          <div class="brow"><div class="bl"><span>Women's deaths registered</span><b>43.7%</b></div><div class="track"><div class="fill" data-w="43.7" style="background:var(--death)"></div></div></div>
+        </div>
+        <p class="sub" style="margin-top:14px">A woman's death is less likely to be on the record. The gap is 14 points.</p>
+      </div>
+    </div>
+    <p class="note">Sources: CRVS 2025 Final Tables, Table 14, Figure 21 and Table 12. "About 38,500" = 77,876 expected − 39,355 registered deaths (our calculation).</p>
+  </div>
+</section>
+
+<!-- 4. WHAT IS WORKING -->
+<section>
+  <div class="wrap reveal">
+    <div class="step">3</div>
+    <h2>What is working: asking families, and doctors writing it down</h2>
+    <p class="lede">When someone dies at home, a trained interviewer can ask the family about the symptoms and work out the likely cause. This is a <b>verbal autopsy</b>. Rwanda now does about 10 times more of them than in 2022.</p>
+    <div class="cols" style="margin-top:28px">
+      <div class="card">
+        <p class="kicker">Verbal autopsies for community deaths</p>
+        <div class="chart" id="vaChart">
+          <div class="colchart">
+            <div class="colw"><div class="colv">1,889</div><div class="col" data-h="1889"></div></div>
+            <div class="colw"><div class="colv">8,369</div><div class="col" data-h="8369"></div></div>
+            <div class="colw"><div class="colv">13,703</div><div class="col" data-h="13703"></div></div>
+            <div class="colw"><div class="colv">18,921</div><div class="col" data-h="18921"></div></div>
+          </div>
+          <div class="colx"><div>2022</div><div>2023</div><div>2024</div><div>2025</div></div>
+        </div>
+        <p class="note">Interviews for deaths in the same year. Table 16.</p>
+      </div>
+      <div class="card">
+        <p class="kicker">Hospital deaths with a usable cause</p>
+        <div class="chart" id="usable"></div>
+        <p class="note">Share of medically certified facility deaths whose cause can be used for statistics. Figure 24.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. WHY IT MATTERS -->
+<section>
+  <div class="wrap reveal">
+    <div class="step">4</div>
+    <h2>Why every death record matters</h2>
+    <p class="lede">A registered death with a cause tells health planners what is killing people. The deaths counted in 2025 show a clear pattern.</p>
+    <div class="cols" style="margin-top:28px">
+      <div class="card">
+        <p class="kicker">Causes of death, 2025 (usable causes only)</p>
+        <div class="legend" style="margin:0 0 12px"><span><span class="swatch" style="background:var(--birth)"></span>Health facility</span><span><span class="swatch" style="background:var(--death)"></span>Community</span></div>
+        <div class="bars" id="causes"></div>
+      </div>
+      <div class="card">
+        <p class="kicker">What the records reveal</p>
+        <div class="stat">Heart disease</div>
+        <p class="sub">is the leading cause of death at home: cardiac diseases take the top two places (16.2% and 11.1% of community deaths).</p>
+        <div class="stat" style="margin-top:20px">Newborns</div>
+        <p class="sub">Conditions around birth are the #1 cause in health facilities (14.9%). The neonatal death rate fell from <b>23.5 to 18.7 per 1,000</b> live births between 2019 and 2025. <span class="pill">↓ 4.8</span></p>
+      </div>
+    </div>
+    <p class="callout">Non-communicable diseases like heart disease, cancer, stroke and diabetes now cause <b>about half of all recorded deaths</b>. We only know this because those deaths were counted.</p>
+    <p class="note">Sources: Figure 25, Table 17, Table 10.8 (adjusted neonatal mortality rate).</p>
+  </div>
+</section>
+
+<!-- 6. CALL TO ACTION -->
+<section>
+  <div class="wrap reveal">
+    <div class="cta">
+      <p class="kicker" style="color:#bdbcb5">What can close the gap</p>
+      <h2>Count every life, from first breath to last</h2>
+      <p>Births show it can be done: 99.1% of registered births in 2025 were registered on time. Deaths can follow.</p>
+      <ol>
+        <li><b>Families</b>Register every death within 30 days, especially when it happens at home.</li>
+        <li><b>Communities</b>Grow verbal autopsy coverage in rural districts, where most deaths happen at home.</li>
+        <li><b>Policy makers</b>Use cause-of-death data to target heart disease and newborn care.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- TABLE -->
+<section>
+  <div class="wrap">
+    <button class="tbtn" id="tbtn" type="button" aria-expanded="false" aria-controls="tbl">See all the numbers</button>
+    <div class="tablewrap" id="tbl" hidden>
+      <table>
+        <thead><tr><th>Indicator</th><th>2019</th><th>2020</th><th>2021</th><th>2022</th><th>2023</th><th>2024</th><th>2025</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <h3>Source</h3>
+    <p>National Institute of Statistics of Rwanda (NISR), <i>Rwanda Vital Statistics Report 2025</i>, Final Tables (CRVS 2025) and 2025 Birth, Death &amp; Cause of Death fact sheets, statistics.gov.rw. Figures marked "our calculation" are derived from NISR numbers.</p>
+    <h3>Made by</h3>
+    <p>Regina Anthony Majura &amp; Faith Mutoni, African Leadership University. NISR Infographic Competition 2026.</p>
+    <p>We declare that this infographic is our own work and that all sources are acknowledged in full.</p>
+  </div>
+</footer>
+
+<div class="tip" id="tip" role="status"></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="person" viewBox="0 0 20 34"><circle cx="10" cy="6" r="5.2"/><path d="M3.2 14.5c0-1.9 1.5-3.4 3.4-3.4h6.8c1.9 0 3.4 1.5 3.4 3.4V23c0 1-.8 1.8-1.8 1.8h-.9V32c0 1.1-.9 2-2 2H7.9c-1.1 0-2-.9-2-2v-7.2H5c-1 0-1.8-.8-1.8-1.8z"/></symbol>
+</svg>
+
+<script>
+const YEARS=[2019,2020,2021,2022,2023,2024,2025];
+const D={
+  birth:[87.0,85.8,84.2,92.9,90.0,90.3,92.9],
+  death:[31.4,29.9,26.2,31.1,41.8,46.1,50.5],
+  births:[313398,312678,310249,341122,334018,341029,356838],
+  deaths:[23791,22634,19797,null,32853,36021,39355],
+  usable:[48.4,43.8,56.6,54.5,64.8,64.7,82.3],
+  neonatal:[23.5,23.0,23.7,25.4,20.3,19.2,18.7]
+};
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const fmt=n=>n==null?'–':n.toLocaleString('en-US');
+const tip=document.getElementById('tip');
+function showTip(html,x,y,host){tip.innerHTML=html;tip.style.opacity=1;const r=host.getBoundingClientRect(),w=tip.offsetWidth;let left=r.left+window.scrollX+x+14;if(left+w>window.scrollX+document.documentElement.clientWidth-8)left=r.left+window.scrollX+x-w-14;tip.style.left=left+'px';tip.style.top=(r.top+window.scrollY+y-tip.offsetHeight-10)+'px'}
+function hideTip(){tip.style.opacity=0}
+
+/* people grids */
+function buildGrid(id){const g=document.getElementById(id);let h='';for(let i=0;i<100;i++)h+='<svg viewBox="0 0 20 34"><use href="#person" fill="'+css('--empty')+'"/></svg>';g.innerHTML=h;return [...g.querySelectorAll('use')]}
+const bUse=buildGrid('bGrid'),dUse=buildGrid('dGrid');
+const yr=document.getElementById('year'),yrLabel=document.getElementById('yrLabel');
+function setYear(y){const i=YEARS.indexOf(+y);const b=D.birth[i],d=D.death[i];const bn=Math.round(b),dn=Math.round(d);
+  bUse.forEach((u,k)=>u.setAttribute('fill',k<bn?css('--birth'):css('--empty')));
+  dUse.forEach((u,k)=>u.setAttribute('fill',k<dn?css('--death'):css('--empty')));
+  document.getElementById('bNum').textContent=b.toFixed(1)+'%';document.getElementById('dNum').textContent=d.toFixed(1)+'%';
+  document.getElementById('bSub').textContent=fmt(D.births[i])+' births registered in '+y;
+  document.getElementById('dSub').textContent=D.deaths[i]?fmt(D.deaths[i])+' deaths registered in '+y:'of expected deaths were registered in '+y;
+  yrLabel.textContent=y;yr.value=y}
+yr.addEventListener('input',e=>{stop();setYear(e.target.value)});
+let timer=null;const playBtn=document.getElementById('play');
+function stop(){clearInterval(timer);timer=null;playBtn.textContent='▶ Play'}
+playBtn.addEventListener('click',()=>{if(timer){stop();return}let i=0;setYear(YEARS[0]);playBtn.textContent='❚❚ Pause';timer=setInterval(()=>{i++;if(i>=YEARS.length){stop();return}setYear(YEARS[i])},1100)});
+setYear(2025);
+
+/* line chart */
+function lineChart(el,series,opts){
+  const W=opts.w||900,H=opts.h||360,m={t:24,r:opts.r||150,b:36,l:44};const iw=W-m.l-m.r,ih=H-m.t-m.b;
+  const xs=opts.years,x=i=>m.l+(xs.length===1?0:i*iw/(xs.length-1)),y=v=>m.t+ih-(v-opts.min)/(opts.max-opts.min)*ih;
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${opts.label}">`;
+  for(let v=opts.min;v<=opts.max;v+=opts.step)s+=`<line class="${v===opts.min?'base':'gl'}" x1="${m.l}" x2="${W-m.r}" y1="${y(v)}" y2="${y(v)}"/><text x="${m.l-8}" y="${y(v)+4}" text-anchor="end">${v}%</text>`;
+  xs.forEach((yv,i)=>s+=`<text x="${x(i)}" y="${H-10}" text-anchor="middle">${yv}</text>`);
+  s+=`<line class="cross" x1="0" x2="0" y1="${m.t}" y2="${m.t+ih}"/>`;
+  series.forEach(se=>{const pts=se.v.map((v,i)=>[x(i),y(v)]);
+    s+=`<path class="line draw" stroke="${se.c}" d="M${pts.map(p=>p.join(',')).join('L')}"/>`;
+    s+=`<circle class="dot fade" r="6" fill="${se.c}" cx="${pts[0][0]}" cy="${pts[0][1]}"/><circle class="dot fade" r="6" fill="${se.c}" cx="${pts.at(-1)[0]}" cy="${pts.at(-1)[1]}"/>`;
+    s+=`<text class="lab fade" x="${pts.at(-1)[0]+12}" y="${pts.at(-1)[1]-2}">${se.v.at(-1)}%</text><text class="lab2 fade" x="${pts.at(-1)[0]+12}" y="${pts.at(-1)[1]+15}">${se.short}</text>`;
+    if(se.startLabel)s+=`<text class="lab fade" x="${pts[0][0]}" y="${pts[0][1]+(se.below?24:-12)}" text-anchor="start">${se.v[0]}%</text>`;
+  });
+  (opts.annot||[]).forEach(a=>s+=`<text class="lab2 fade" x="${x(a.i)}" y="${y(a.v)+a.dy}" text-anchor="middle">${a.t}</text>`);
+  s+=`<rect x="${m.l}" y="0" width="${iw}" height="${H}" fill="transparent" class="hit"/></svg>`;
+  el.innerHTML=s;const svg=el.querySelector('svg'),path=[...svg.querySelectorAll('.draw')];
+  path.forEach(p=>p.style.setProperty('--len',Math.ceil(p.getTotalLength())));
+  const cross=svg.querySelector('.cross');
+  svg.querySelector('.hit').addEventListener('pointermove',ev=>{const r=svg.getBoundingClientRect(),sx=(ev.clientX-r.left)*W/r.width;const i=Math.max(0,Math.min(xs.length-1,Math.round((sx-m.l)/iw*(xs.length-1))));
+    cross.setAttribute('x1',x(i));cross.setAttribute('x2',x(i));cross.style.opacity=1;
+    showTip(`<b>${xs[i]}</b><br>`+series.map(se=>`<i style="background:${se.c}"></i>${se.name}: <b>${se.v[i]}%</b>`).join('<br>'),x(i)*r.width/W,Math.min(...series.map(se=>y(se.v[i])))*r.height/H,svg)});
+  svg.querySelector('.hit').addEventListener('pointerleave',()=>{cross.style.opacity=0;hideTip()});
+}
+lineChart(document.getElementById('trend'),[
+  {name:'Births registered',short:'births',v:D.birth,c:css('--birth'),startLabel:true,below:false},
+  {name:'Deaths registered',short:'deaths',v:D.death,c:css('--death'),startLabel:true,below:true}
+],{years:YEARS,min:0,max:100,step:20,h:380,label:'Line chart: birth registration completeness rose from 87% to 92.9% and death registration completeness from 31.4% to 50.5%, 2019 to 2025',annot:[{i:2,v:26.2,dy:26,t:'low: 26.2%'}]});
+lineChart(document.getElementById('usable'),[
+  {name:'Usable cause (facility)',short:'usable',v:D.usable,c:css('--good'),startLabel:true,below:true}
+],{years:YEARS,min:0,max:100,step:25,w:460,h:280,r:84,label:'Line chart: hospital deaths with a usable cause rose from 48.4% in 2019 to 82.3% in 2025'});
+
+/* causes */
+const causes=[['Non-communicable diseases',49.5,58.8],['Infections, maternal, newborn & nutrition',40.0,26.9],['Injuries',10.5,14.3]];
+document.getElementById('causes').innerHTML=causes.map(c=>`<div class="brow"><div class="bl"><span>${c[0]}</span></div>
+ <div class="track" style="background:transparent;margin-bottom:4px"><div class="fill" data-w="${c[1]}" style="background:var(--birth)" data-tip="${c[0]}<br>Health facility: <b>${c[1]}%</b>"></div></div><div class="bl" style="margin:-2px 0 6px;font-size:13px;color:var(--ink-2)"><span>Facility</span><b>${c[1]}%</b></div>
+ <div class="track" style="background:transparent;margin-bottom:4px"><div class="fill" data-w="${c[2]}" style="background:var(--death)" data-tip="${c[0]}<br>Community: <b>${c[2]}%</b>"></div></div><div class="bl" style="margin:-2px 0 0;font-size:13px;color:var(--ink-2)"><span>Community</span><b>${c[2]}%</b></div></div>`).join('');
+
+/* hover on bars & columns */
+document.querySelectorAll('.fill[data-tip], .col').forEach(el=>{
+  el.addEventListener('pointermove',ev=>{const host=el.closest('.card');const r=host.getBoundingClientRect();const html=el.dataset.tip||`Verbal autopsies: <b>${(+el.dataset.h).toLocaleString('en-US')}</b>`;showTip(html,ev.clientX-r.left,ev.clientY-r.top,host)});
+  el.addEventListener('pointerleave',hideTip)});
+
+/* scroll reveal */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;const t=e.target;t.classList.add('in');t.querySelectorAll('.chart').forEach(c=>c.classList.add('in'));
+  t.querySelectorAll('.fill[data-w]').forEach(f=>f.style.width=f.dataset.w+'%');
+  t.querySelectorAll('.col[data-h]').forEach(c=>c.style.height=(c.dataset.h/18921*100)+'%');io.unobserve(t)}),{threshold:.2});
+document.querySelectorAll('.reveal').forEach(s=>io.observe(s));
+
+/* table */
+const rows=[['Birth registration completeness (%)',D.birth],['Death registration completeness (%)',D.death],['Registered live births',D.births],['Registered deaths',D.deaths],['Hospital deaths with usable cause (%)',D.usable],['Neonatal mortality (per 1,000 live births, adjusted)',D.neonatal],['Verbal autopsies, same-year deaths',[null,null,null,1889,8369,13703,18921]]];
+document.getElementById('tbody').innerHTML=rows.map(r=>`<tr><td>${r[0]}</td>${r[1].map(v=>`<td>${v==null?'–':(v>1000?fmt(v):v)}</td>`).join('')}</tr>`).join('')+`<tr><td colspan="8" style="text-align:left;color:var(--muted)">2022 registered deaths left blank: NISR tables give two values (25,536 and 25,567). Source: NISR CRVS 2025 Final Tables.</td></tr>`;
+const tb=document.getElementById('tbtn'),tbl=document.getElementById('tbl');
+tb.addEventListener('click',()=>{const open=tbl.hidden;tbl.hidden=!open;tb.setAttribute('aria-expanded',open);tb.textContent=open?'Hide the numbers':'See all the numbers'});
+</script>
+</body>
+</html>

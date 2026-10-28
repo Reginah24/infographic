@@ -1,0 +1,14 @@
+indicator,2019,2020,2021,2022,2023,2024,2025,unit,source
+birth_registration_completeness,87.0,85.8,84.2,92.9,90.0,90.3,92.9,%,CRVS 2025 Final Tables - Table 10.3 / Figure 7
+death_registration_completeness,31.4,29.9,26.2,31.1,41.8,46.1,50.5,%,CRVS 2025 Final Tables - Table 12 / Figure 7
+death_completeness_male,34.0,32.6,27.8,35.7,47.1,51.9,57.6,%,CRVS 2025 Final Tables - Table 12
+death_completeness_female,28.7,27.1,24.4,26.8,36.8,40.5,43.7,%,Rwanda Vital Statistics Report 2025 (PDF) and Final Tables 10.5 (Table 12 xlsx says 43.6)
+registered_live_births,313398,312678,310249,341122,334018,341029,356838,count,CRVS 2025 Final Tables - Table 10.3
+expected_live_births,360388,364342,368251,367312,370964,377548,384279,count,CRVS 2025 Final Tables - Table 10.3
+registered_deaths,23791,22634,19797,,32853,36021,39355,count,CRVS 2025 Final Tables - Table 12 (2022 left blank: Table 12 = 25536 / Table 11 = 25567)
+expected_deaths,75712,75624,75653,82241,78561,78121,77876,count,CRVS 2025 Final Tables - Table 12
+unregistered_deaths_share_of_expected,68.6,70.1,73.8,68.9,58.5,53.9,49.5,%,CRVS 2025 Final Tables - Figure 17
+usable_cause_of_death_health_facility,48.4,43.8,56.6,54.5,64.8,64.7,82.3,%,CRVS 2025 Final Tables - Figure 24 / Table 10.9
+usable_cause_of_death_community,,,,,90.0,84.0,83.9,%,CRVS 2025 Final Tables - Figure 24 / Table 10.9
+verbal_autopsies_same_year_deaths,,,,1889,8369,13703,18921,count,CRVS 2025 Final Tables - Table 16
+neonatal_mortality_rate_adjusted,23.5,23.0,23.7,25.4,20.3,19.2,18.7,per 1000 live births,CRVS 2025 Final Tables - Table 10.8
